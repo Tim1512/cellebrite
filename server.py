@@ -1,4 +1,6 @@
 from flask import Flask, request, jsonify
+import utils 
+import sys
 
 MORSE_CODE_DICT = { 'A':'.-', 'B':'-...',
                     'C':'-.-.', 'D':'-..', 'E':'.',
@@ -16,23 +18,18 @@ MORSE_CODE_DICT = { 'A':'.-', 'B':'-...',
                     '?':'..--..', '/':'-..-.', '-':'-....-',
                     '(':'-.--.', ')':'-.--.-'}
 
-def encrypt(message):
-    cipher = ''
-    for letter in message:
-        if letter != ' ':
-            cipher += MORSE_CODE_DICT[letter] + ' '
-        else:
-            cipher += ' '
- 
-    return cipher
-
 app = Flask(__name__)
 
-@app.route("/get_my_ip", methods=["GET"])
+@app.route("/api/v1/mors", methods=["GET"])
 def get_my_ip():
-    print(request)
-    mors = encrypt(request.remote_addr)
+    mors = utils.encrypt(message=request.remote_addr, mors_code_dict=MORSE_CODE_DICT)
+
     return jsonify({'ip_translate_to_mors': mors}), 200
 
 if __name__ == '__main__':
- app.run(host='0.0.0.0', debug=True, port=8080)
+    args = utils.parse_args()
+    if not args.port:
+        print("ERROR: Please enter app port with --port flag")
+        sys.exit(1)
+    else:
+        app.run(host='0.0.0.0', debug=True, port=args.port)
